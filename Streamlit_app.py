@@ -20,12 +20,15 @@ st.write('The name on your Smoothies will be', name_on_order)
 cnx = st.connection("snowflake")
 session = cnx.session()
 
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
-#st.dataframe(data=my_dataframe, use_container_width=True)
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
+# st.dataframe(data=my_dataframe, use_container_width=True)
+
+# Convert Snowpark DataFrame to Pandas DataFrame so we can use loc
+pd_df = my_dataframe.to_pandas()
 
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
-    my_dataframe
+    pd_df['FRUIT_NAME']
 )
 
 if ingredients_list:
@@ -33,10 +36,14 @@ if ingredients_list:
 
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
-        st.subheader(fruit_chosen + 'Nutrition information')
+        
+        # SEARCH_ON column se search value nikalna
+        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        st.write(f'The search value for {fruit_chosen} is {search_on}.')
+        
         # Display nutrition information safely for each selected fruit
         st.subheader(fruit_chosen + ' Nutrition Information')
-        smoothiefroot_response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{fruit_chosen}")
+        smoothiefroot_response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_on}")
         
         if smoothiefroot_response.status_code == 200:
             try:
@@ -46,11 +53,11 @@ if ingredients_list:
         else:
             st.warning(f"Could not fetch data for {fruit_chosen}. API status code: {smoothiefroot_response.status_code}")
 
-    my_insert_stmt = """INSERT INTO smoothies.public.orders
-                        (ingredients, name_on_order)
-                        VALUES ('""" + ingredients_string + """', '""" + name_on_order + """')"""
+    safe_ingredients = ingredients_string.replace("'", "''")
+    safe_name = name_on_order.replace("'", "''")
 
-    # st.write(my_insert_stmt)
+    my_insert_stmt = f"""INSERT INTO smoothies.public.orders (ingredients, name_on_order) 
+                        VALUES ('{safe_ingredients}', '{safe_name}')"""
 
     time_to_insert = st.button('Submit Order')
 
