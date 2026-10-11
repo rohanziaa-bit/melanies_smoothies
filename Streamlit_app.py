@@ -13,11 +13,6 @@ st.write(
     """
 )
 
-#new section requests 
-smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon") 
-#st.text(smoothiefroot_response.text)
-sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
-
 name_on_order = st.text_input('Name on Smoothies')
 st.write('The name on your Smoothies will be', name_on_order)
 
@@ -37,7 +32,12 @@ if ingredients_list:
     ingredients_string = ''
 
     for fruit_chosen in ingredients_list:
-        ingredients_string += fruit_chosen
+        ingredients_string += fruit_chosen + ' '
+        
+        # Display nutrition information for each selected fruit from Smoothiefroot API
+        st.subheader(fruit_chosen + ' Nutrition Information')
+        smoothiefroot_response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{fruit_chosen}")
+        st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
 
     my_insert_stmt = """INSERT INTO smoothies.public.orders
                         (ingredients, name_on_order)
