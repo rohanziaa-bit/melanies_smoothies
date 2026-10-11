@@ -1,6 +1,7 @@
 # Import python packages
 import streamlit as st
 from snowflake.snowpark.functions import col
+import requests
 
 # Write directly to the app
 st.title(f"Customize Your smoothie :balloon: {st.__version__}")
@@ -13,14 +14,13 @@ st.write(
 )
 
 #new section requests 
-import requests  
 smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon") 
 st.text(smoothiefroot_response)
 
 name_on_order = st.text_input('Name on Smoothies')
 st.write('The name on your Smoothies will be', name_on_order)
 
-# Connect to Snowflake using standard Streamlit connection[cite: 8]
+# Connect to Snowflake using standard Streamlit connection
 cnx = st.connection("snowflake")
 session = cnx.session()
 
