@@ -14,8 +14,8 @@ st.write(
 )
 
 #new section requests 
-smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-st.text(smoothiefroot_response.json())  # ya st.json(smoothiefroot_response.json())
+smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon") 
+st.text(smoothiefroot_response.text)
 
 name_on_order = st.text_input('Name on Smoothies')
 st.write('The name on your Smoothies will be', name_on_order)
